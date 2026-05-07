@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IGNIS ERP - Daily Report</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand-wrap"><img src="./logo.png" class="logo"><div><div class="brand">IGNIS ERP</div></div></div>
+      
+    </div>
+    <nav>
+      <button onclick="saveReport()">保存 / Save / บันทึก</button>
+      <button onclick="loadReport()">读取 / Load / โหลด</button>
+      <button onclick="exportJSON()">导出JSON / Export JSON / ส่งออก JSON</button>
+      <button onclick="window.print()">打印/PDF / Print/PDF / พิมพ์/PDF</button>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="report-card">
+      <h1>
+        Workforce Daily Update Report<br>
+        <span>人力资源每日报告 / รายงานอัปเดตกำลังคนประจำวัน</span>
+      </h1>
+
+      <div class="meta-grid">
+        <label>Date / 日期 / วันที่ <input id="reportDate" type="date"></label>
+        <label>Client Name / 客户名称 / ชื่อลูกค้า <input id="clientName" value="Midea"></label>
+        <label>Prepared By / 制表人 / จัดทำโดย <input id="preparedBy" value="IGNIS Thailand"></label>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><span>Total Active / 当前在职 / พนักงานปัจจุบัน</span><strong id="kpiActive">95</strong></div>
+        <div class="kpi"><span>Actual Attendance / 实际出勤 / เข้างานจริง</span><strong id="kpiAttendance">87</strong></div>
+        <div class="kpi"><span>Attendance Rate / 出勤率 / อัตราการเข้างาน</span><strong id="kpiRate">91.6%</strong></div>
+        <div class="kpi"><span>Turnover Today / 今日异动 / การเปลี่ยนแปลงวันนี้</span><strong id="kpiTurnover">+0 / -6</strong></div>
+      </div>
+
+      <h2>1. Headcount & Attendance / 人数与出勤统计 / จำนวนพนักงานและการเข้างาน</h2>
+      <div class="form-grid">
+        <label>Yesterday Headcount / 昨日人数 / จำนวนเมื่อวาน <input id="yesterdayHeadcount" type="number" value="101"></label>
+        <label>New Joiners / 今日入职 / เข้างานใหม่วันนี้ <input id="newJoinersCount" type="number" value="0"></label>
+        <label>Resignations / 今日离职 / ลาออกวันนี้ <input id="resignationsCount" type="number" value="6"></label>
+        <label>Today Active / 今日在职 / พนักงานปัจจุบันวันนี้ <input id="todayActive" type="number" value="95"></label>
+        <label>Leaves / 请假 / ลางาน <input id="leavesCount" type="number" value="8"></label>
+        <label>Absences / 旷工 / ขาดงาน <input id="absencesCount" type="number" value="0"></label>
+        <label>Actual Attendance / 实际出勤 / เข้างานจริง <input id="actualAttendance" type="number" value="87"></label>
+        <label>Attendance Rate / 出勤率 / อัตราการเข้างาน <input id="attendanceRate" readonly></label>
+      </div>
+
+      <h2>2. Visual Data / 数据可视化 / ข้อมูลภาพรวม</h2>
+      <div class="charts">
+        <div class="chart-box"><canvas id="attendanceChart"></canvas></div>
+        <div class="chart-box"><canvas id="movementChart"></canvas></div>
+      </div>
+
+      <h2>3. Inventory Management / 数据库库存管理 / การจัดการสต็อกสินค้า</h2>
+      <div class="toolbar"><button onclick="addRow('inventoryTable')">添加库存行 / Add Row / เพิ่มแถว</button></div>
+      <table id="inventoryTable">
+        <thead>
+          <tr>
+            <th>Item<br>物品<br>รายการ</th>
+            <th>Category<br>类别<br>หมวดหมู่</th>
+            <th>Office<br>办公室<br>สำนักงาน</th>
+            <th>Onsite Workers<br>现场员工<br>พนักงานหน้างาน</th>
+            <th>Total<br>总数<br>รวม</th>
+            <th>Target<br>目标<br>เป้าหมาย</th>
+            <th>Status<br>状态<br>สถานะ</th>
+            <th>Action<br>操作<br>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td contenteditable>Black Shirt</td><td contenteditable>Shirt</td><td contenteditable>0</td><td contenteditable>231</td><td contenteditable>231</td><td contenteditable>200</td><td contenteditable>OK</td><td><button onclick="deleteRow(this)">删除 / Delete / ลบ</button></td></tr>
+          <tr><td contenteditable>Safety Shoes</td><td contenteditable>Shoes</td><td contenteditable>115</td><td contenteditable>32</td><td contenteditable>147</td><td contenteditable>150</td><td contenteditable>Low</td><td><button onclick="deleteRow(this)">删除 / Delete / ลบ</button></td></tr>
+        </tbody>
+      </table>
+
+      <h2>4. Daily Movement & Leave Details / 今日人员异动与请假明细 / รายละเอียดการเปลี่ยนแปลงและการลา</h2>
+
+      <h3>A. New Joiners Today / 今日入职名单 / รายชื่อพนักงานใหม่วันนี้</h3>
+      <div class="toolbar"><button onclick="addRow('joinersTable')">添加入职人员 / Add New Joiner / เพิ่มพนักงานใหม่</button></div>
+      <table id="joinersTable">
+        <thead><tr><th>No.<br>序号<br>ลำดับ</th><th>Emp ID<br>工号<br>รหัสพนักงาน</th><th>Name<br>姓名<br>ชื่อ</th><th>Gender<br>性别<br>เพศ</th><th>Dept/Line<br>部门/产线<br>แผนก/ไลน์</th><th>Join Date<br>入职日期<br>วันที่เริ่มงาน</th><th>Remark<br>备注<br>หมายเหตุ</th><th>Action<br>操作<br>จัดการ</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>B. Resignations Today / 今日离职名单 / รายชื่อพนักงานลาออกวันนี้</h3>
+      <div class="toolbar"><button onclick="addRow('resignTable')">添加离职人员 / Add Resignation / เพิ่มพนักงานลาออก</button></div>
+      <table id="resignTable">
+        <thead><tr><th>No.<br>序号<br>ลำดับ</th><th>Emp ID<br>工号<br>รหัสพนักงาน</th><th>Name<br>姓名<br>ชื่อ</th><th>Join Date<br>入职日期<br>วันที่เริ่มงาน</th><th>Resign Date<br>离职日期<br>วันที่ลาออก</th><th>Tenure/Line<br>工龄/产线<br>อายุงาน/ไลน์</th><th>Reason<br>原因<br>เหตุผล</th><th>Action<br>操作<br>จัดการ</th></tr></thead>
+        <tbody>
+          <tr><td contenteditable>1</td><td contenteditable>30098</td><td contenteditable>Korapat Panyapums</td><td contenteditable>16.3.2026</td><td contenteditable>6.5.2026</td><td contenteditable>MARA</td><td contenteditable>Frequent leave</td><td><button onclick="deleteRow(this)">删除 / Delete / ลบ</button></td></tr>
+        </tbody>
+      </table>
+
+      <h3>C. Leaves Today / 今日请假明细 / รายละเอียดการลาวันนี้</h3>
+      <div class="toolbar"><button onclick="addRow('leaveTable')">添加请假人员 / Add Leave / เพิ่มรายการลา</button></div>
+      <table id="leaveTable">
+        <thead><tr><th>No.<br>序号<br>ลำดับ</th><th>Emp ID<br>工号<br>รหัสพนักงาน</th><th>Name<br>姓名<br>ชื่อ</th><th>Leave Type<br>请假类型<br>ประเภทการลา</th><th>Reason<br>原因<br>เหตุผล</th><th>Remark<br>备注<br>หมายเหตุ</th><th>Action<br>操作<br>จัดการ</th></tr></thead>
+        <tbody>
+          <tr><td contenteditable>1</td><td contenteditable>300158</td><td contenteditable>Kittisak Worasilp</td><td contenteditable>Sick leave</td><td contenteditable>Not feeling well</td><td contenteditable>SCR</td><td><button onclick="deleteRow(this)">删除 / Delete / ลบ</button></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
